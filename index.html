@@ -3,40 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Scan Studio</title>
+  <title>3D Scan Studio — Mobile Capture Workflow</title>
+  <meta name="description" content="Elegante mobile Aufnahmeoberfläche für 3D-Scan-Projekte mit Kamera, Upload, Galerie und JSON-Export." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0d1117;
-      --bg-soft:#131a22;
-      --panel:rgba(18, 25, 34, 0.72);
-      --panel-strong:rgba(14, 19, 27, 0.88);
-      --line:rgba(255,255,255,0.1);
-      --text:#eef2f7;
-      --muted:#a4b0bf;
-      --accent:#7cf2c9;
-      --accent-2:#7aa7ff;
-      --danger:#ff7b7b;
-      --shadow:0 20px 60px rgba(0,0,0,0.35);
-      --radius-xl:28px;
-      --radius-lg:20px;
-      --radius-md:14px;
-      --max:1240px;
+      --bg:#f6f1e8;
+      --bg-2:#efe6d7;
+      --paper:rgba(255,250,242,0.78);
+      --paper-strong:rgba(255,248,238,0.92);
+      --ink:#1f1b18;
+      --muted:#6f665f;
+      --line:rgba(31,27,24,0.11);
+      --accent:#cf6a32;
+      --accent-deep:#9d4620;
+      --sage:#708a72;
+      --gold:#b79043;
+      --danger:#b84f4f;
+      --shadow:0 20px 60px rgba(68,42,23,0.12);
+      --radius-xl:32px;
+      --radius-lg:22px;
+      --radius-md:16px;
+      --max:1280px;
+      --pad:clamp(1rem, 2vw, 1.4rem);
     }
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family:"Space Grotesk", sans-serif;
-      color:var(--text);
+      color:var(--ink);
+      font-family:"Manrope", sans-serif;
       background:
-        radial-gradient(circle at 12% 18%, rgba(122,167,255,0.22), transparent 28%),
-        radial-gradient(circle at 82% 22%, rgba(124,242,201,0.16), transparent 22%),
-        radial-gradient(circle at 50% 100%, rgba(255,255,255,0.07), transparent 32%),
-        linear-gradient(145deg, #0a0f14 0%, #0d1117 45%, #121922 100%);
+        radial-gradient(circle at 15% 10%, rgba(207,106,50,0.12), transparent 24%),
+        radial-gradient(circle at 84% 14%, rgba(112,138,114,0.15), transparent 20%),
+        radial-gradient(circle at 50% 100%, rgba(183,144,67,0.08), transparent 28%),
+        linear-gradient(180deg, #f8f3eb 0%, #f2ebdf 38%, #ece2d2 100%);
       min-height:100vh;
       overflow-x:hidden;
       position:relative;
@@ -48,289 +52,467 @@
       inset:0;
       pointer-events:none;
       background:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size:34px 34px;
-      mask-image:radial-gradient(circle at center, black 45%, transparent 95%);
-      opacity:.35;
+        linear-gradient(rgba(31,27,24,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31,27,24,0.03) 1px, transparent 1px);
+      background-size:32px 32px;
+      opacity:.55;
+      mask-image:radial-gradient(circle at center, black 34%, transparent 92%);
     }
 
-    body::after{
-      content:"";
+    .grain{
       position:fixed;
-      inset:-10%;
+      inset:0;
       pointer-events:none;
-      background:
-        radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(255,255,255,0.02) 42.5% 43%, transparent 43.5%),
-        radial-gradient(circle at 50% 50%, transparent 0 58%, rgba(124,242,201,0.035) 58.5% 59%, transparent 59.5%);
-      opacity:.35;
-      transform:rotate(-8deg);
+      opacity:.06;
+      mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23000000'%3E%3Ccircle cx='12' cy='16' r='1'/%3E%3Ccircle cx='64' cy='38' r='1'/%3E%3Ccircle cx='112' cy='27' r='1'/%3E%3Ccircle cx='158' cy='42' r='1'/%3E%3Ccircle cx='27' cy='76' r='1'/%3E%3Ccircle cx='86' cy='95' r='1'/%3E%3Ccircle cx='144' cy='84' r='1'/%3E%3Ccircle cx='41' cy='142' r='1'/%3E%3Ccircle cx='103' cy='151' r='1'/%3E%3Ccircle cx='166' cy='133' r='1'/%3E%3C/g%3E%3C/svg%3E");
     }
+
+    img{max-width:100%;display:block}
+    button,input{font:inherit}
 
     .page{
-      width:min(calc(100% - 2rem), var(--max));
+      width:min(calc(100% - 1.2rem), var(--max));
       margin:0 auto;
-      padding:1rem 0 4rem;
       position:relative;
       z-index:1;
+      padding:1rem 0 4rem;
     }
 
-    .hero{
-      min-height:100svh;
-      display:grid;
-      align-items:center;
-      padding:clamp(2rem, 4vw, 4rem) 0 2rem;
-    }
-
-    .hero-shell{
-      display:grid;
-      grid-template-columns:1.08fr .92fr;
-      gap:clamp(1.2rem, 3vw, 2rem);
-      align-items:stretch;
-    }
-
-    .hero-copy,
-    .hero-visual,
-    .gallery-section{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius-xl);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
-    }
-
-    .hero-copy{
-      padding:clamp(1.5rem, 3vw, 3rem);
+    .site-nav{
       display:flex;
-      flex-direction:column;
-      justify-content:center;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      padding:.7rem .2rem 1.2rem;
+      animation:fadeSlide .7s ease both;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:.85rem;
+      min-width:0;
+    }
+
+    .brand-mark{
+      width:46px;
+      height:46px;
+      border-radius:15px;
+      background:
+        radial-gradient(circle at 30% 30%, #f9d4ba, transparent 34%),
+        linear-gradient(135deg, var(--accent), var(--accent-deep));
+      box-shadow:0 12px 30px rgba(157,70,32,.22);
       position:relative;
       overflow:hidden;
     }
 
-    .hero-copy::before{
-      content:"SCAN";
+    .brand-mark::before,
+    .brand-mark::after{
+      content:"";
       position:absolute;
-      right:-.5rem;
-      top:-1rem;
-      font-family:"Sora", sans-serif;
-      font-size:clamp(4rem, 14vw, 9rem);
-      font-weight:800;
-      line-height:.85;
-      color:rgba(255,255,255,0.04);
-      letter-spacing:-0.06em;
+      inset:10px;
+      border:1.5px solid rgba(255,255,255,.6);
+      border-radius:10px;
+      transform:rotate(45deg);
+    }
+
+    .brand-mark::after{
+      inset:16px;
+      opacity:.65;
+    }
+
+    .brand-copy{
+      min-width:0;
+    }
+
+    .brand-copy strong{
+      display:block;
+      font-family:"Syne", sans-serif;
+      letter-spacing:-.04em;
+      font-size:1.1rem;
+    }
+
+    .brand-copy span{
+      display:block;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .nav-status{
+      display:flex;
+      align-items:center;
+      gap:.6rem;
+      background:rgba(255,250,242,.62);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:.65rem .9rem;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:var(--shadow);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--danger);
+      box-shadow:0 0 0 0 rgba(184,79,79,.35);
+      transition:background .25s ease, box-shadow .25s ease;
+    }
+
+    .status-dot.active{
+      background:#3ba76d;
+      box-shadow:0 0 0 8px rgba(59,167,109,.09);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:1rem;
+      align-items:stretch;
+      min-height:calc(100svh - 100px);
+      padding-bottom:1rem;
+    }
+
+    .surface{
+      background:var(--paper);
+      border:1px solid rgba(255,255,255,.55);
+      border-radius:var(--radius-xl);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-copy{
+      padding:clamp(1.3rem, 2.8vw, 2.6rem);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      animation:fadeSlide .8s ease both;
+    }
+
+    .hero-copy::before{
+      content:"CAPTURE";
+      position:absolute;
+      right:-.3rem;
+      top:-.4rem;
+      font-family:"Syne", sans-serif;
+      font-size:clamp(4rem, 12vw, 8rem);
+      line-height:.9;
+      letter-spacing:-.08em;
+      color:rgba(31,27,24,.04);
       pointer-events:none;
     }
 
     .eyebrow{
       margin:0 0 .8rem;
-      color:var(--accent);
       text-transform:uppercase;
-      letter-spacing:.22em;
+      letter-spacing:.18em;
+      color:var(--accent-deep);
       font-size:.78rem;
-      font-weight:700;
+      font-weight:800;
     }
 
     h1,h2,h3{
-      font-family:"Sora", sans-serif;
+      font-family:"Syne", sans-serif;
+      letter-spacing:-.05em;
       margin:0;
-      letter-spacing:-0.045em;
     }
 
     h1{
-      font-size:clamp(2.4rem, 7vw, 5.5rem);
-      line-height:.95;
+      font-size:clamp(2.4rem, 6vw, 5.7rem);
+      line-height:.94;
       max-width:10ch;
     }
 
     .lead{
-      margin:1.15rem 0 0;
-      max-width:58ch;
+      margin:1rem 0 0;
       color:var(--muted);
-      font-size:clamp(1rem, 1.6vw, 1.08rem);
-      line-height:1.7;
+      max-width:58ch;
+      line-height:1.75;
+      font-size:clamp(1rem, 1.3vw, 1.06rem);
+    }
+
+    .hero-top{
+      position:relative;
+      z-index:1;
+    }
+
+    .project-wrap{
+      margin-top:1.3rem;
+    }
+
+    .project-label{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:1rem;
+      margin-bottom:.5rem;
+      font-size:.92rem;
+      color:var(--muted);
     }
 
     .project-name{
       width:100%;
-      margin-top:1.2rem;
-      padding:1rem 1rem;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,0.06);
-      color:var(--text);
-      font:inherit;
+      border:none;
       outline:none;
-      transition:border-color .2s ease, transform .2s ease, background .2s ease;
+      padding:1rem 1.05rem;
+      border-radius:18px;
+      background:rgba(255,255,255,.58);
+      border:1px solid rgba(31,27,24,.08);
+      color:var(--ink);
+      transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
     }
 
-    .project-name::placeholder{color:#96a0ad}
     .project-name:focus{
-      border-color:rgba(124,242,201,.5);
-      background:rgba(255,255,255,0.09);
       transform:translateY(-1px);
+      border-color:rgba(207,106,50,.3);
+      box-shadow:0 0 0 5px rgba(207,106,50,.08);
+      background:rgba(255,255,255,.82);
     }
 
     .meta-row{
-      margin-top:1.4rem;
       display:grid;
       grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:.9rem;
+      gap:.8rem;
+      margin-top:1.15rem;
+      position:relative;
+      z-index:1;
     }
 
     .meta-card{
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:18px;
       padding:1rem;
-      min-height:96px;
+      border-radius:20px;
+      background:rgba(255,255,255,.46);
+      border:1px solid rgba(31,27,24,.08);
+      min-height:102px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
     }
 
     .meta-label{
-      color:var(--muted);
-      font-size:.8rem;
       text-transform:uppercase;
       letter-spacing:.14em;
+      font-size:.76rem;
+      color:var(--muted);
     }
 
     .meta-card strong{
       font-size:clamp(1.1rem, 2vw, 1.45rem);
+      line-height:1.1;
     }
 
-    .button-row{
-      display:flex;
-      flex-wrap:wrap;
+    .meta-note{
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    .action-cluster{
+      display:grid;
+      gap:.95rem;
+      margin-top:1.25rem;
+      position:relative;
+      z-index:1;
+    }
+
+    .action-row{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
       gap:.8rem;
-      margin-top:1.4rem;
+    }
+
+    .action-row.secondary{
+      grid-template-columns:repeat(3, minmax(0,1fr));
     }
 
     button{
       appearance:none;
       border:none;
-      border-radius:999px;
-      padding:.95rem 1.15rem;
-      font:600 .98rem/1 "Space Grotesk", sans-serif;
       cursor:pointer;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
-      min-height:48px;
+      min-height:52px;
+      border-radius:999px;
+      padding:0 1.1rem;
+      transition:transform .16s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      font-weight:700;
+      letter-spacing:.01em;
     }
 
     button:hover{transform:translateY(-2px)}
-    button:active{transform:translateY(0) scale(.98)}
+    button:active{transform:translateY(0) scale(.985)}
 
     .primary-btn{
-      background:linear-gradient(135deg, var(--accent), #b6ffe7);
-      color:#08110e;
-      box-shadow:0 14px 30px rgba(124,242,201,.18);
+      background:linear-gradient(135deg, var(--accent), #e8915a);
+      color:#fff8f1;
+      box-shadow:0 16px 30px rgba(207,106,50,.22);
     }
 
     .secondary-btn{
-      background:rgba(255,255,255,0.07);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,.58);
+      color:var(--ink);
+      border:1px solid rgba(31,27,24,.08);
+    }
+
+    .ghost-btn{
+      background:rgba(112,138,114,.12);
+      color:#334437;
+      border:1px solid rgba(112,138,114,.18);
     }
 
     .danger-btn{
-      background:rgba(255,123,123,0.15);
-      color:#ffd6d6;
-      border:1px solid rgba(255,123,123,0.24);
+      background:rgba(184,79,79,.12);
+      color:#8f3838;
+      border:1px solid rgba(184,79,79,.18);
+    }
+
+    .hint-strip{
+      margin-top:1rem;
+      padding:.9rem 1rem;
+      border-radius:18px;
+      background:
+        linear-gradient(135deg, rgba(207,106,50,.08), rgba(183,144,67,.08));
+      border:1px dashed rgba(157,70,32,.22);
+      color:#6e5647;
+      line-height:1.55;
+      font-size:.94rem;
     }
 
     .hero-visual{
-      padding:1rem;
+      padding:var(--pad);
       display:grid;
-      align-items:stretch;
-      overflow:hidden;
+      grid-template-rows:minmax(420px, 1fr) auto;
+      gap:.9rem;
+      animation:fadeSlide .95s ease both;
+    }
+
+    .camera-stage{
       position:relative;
-      min-height:540px;
-    }
-
-    .hero-visual::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at 22% 26%, rgba(124,242,201,.18), transparent 20%),
-        radial-gradient(circle at 72% 32%, rgba(122,167,255,.22), transparent 24%),
-        linear-gradient(180deg, rgba(255,255,255,.05), transparent 55%);
-      pointer-events:none;
-    }
-
-    .camera-frame{
-      position:relative;
-      min-height:100%;
-      border-radius:24px;
+      border-radius:28px;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,0.08);
+      min-height:420px;
       background:
-        radial-gradient(circle at 30% 20%, rgba(124,242,201,.2), transparent 18%),
-        radial-gradient(circle at 75% 30%, rgba(122,167,255,.22), transparent 22%),
-        linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-      display:grid;
-      place-items:center;
+        radial-gradient(circle at 30% 22%, rgba(207,106,50,.18), transparent 18%),
+        radial-gradient(circle at 72% 26%, rgba(112,138,114,.18), transparent 18%),
+        linear-gradient(145deg, #d9c6af, #bea280 52%, #a9855e 100%);
+      border:1px solid rgba(31,27,24,.1);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
     }
 
-    .camera-frame::after{
+    .camera-stage::before{
       content:"";
       position:absolute;
       inset:14px;
-      border:1px solid rgba(255,255,255,0.14);
-      border-radius:18px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.32);
       pointer-events:none;
+      z-index:2;
     }
 
-    .camera-frame video{
+    .camera-stage video{
       width:100%;
       height:100%;
+      min-height:420px;
       object-fit:cover;
       display:block;
-      min-height:540px;
-      background:linear-gradient(135deg, #0a0f14, #172332);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.28), transparent 32%),
+        linear-gradient(135deg, #8b735d, #59483a);
     }
 
-    .camera-overlay{
+    .camera-grid{
       position:absolute;
       inset:0;
       pointer-events:none;
       background:
-        linear-gradient(transparent 49.6%, rgba(255,255,255,.08) 50%, transparent 50.4%),
-        linear-gradient(90deg, transparent 49.6%, rgba(255,255,255,.08) 50%, transparent 50.4%);
-      mix-blend-mode:screen;
+        linear-gradient(transparent 33.1%, rgba(255,255,255,.16) 33.3%, transparent 33.5%),
+        linear-gradient(transparent 66.1%, rgba(255,255,255,.16) 66.3%, transparent 66.5%),
+        linear-gradient(90deg, transparent 33.1%, rgba(255,255,255,.16) 33.3%, transparent 33.5%),
+        linear-gradient(90deg, transparent 66.1%, rgba(255,255,255,.16) 66.3%, transparent 66.5%);
+      z-index:1;
     }
 
-    .camera-badge{
+    .camera-chip,
+    .camera-count{
       position:absolute;
-      left:1rem;
-      top:1rem;
-      padding:.6rem .8rem;
+      z-index:3;
+      padding:.65rem .85rem;
       border-radius:999px;
-      background:rgba(10,15,20,.58);
-      border:1px solid rgba(255,255,255,.1);
-      backdrop-filter:blur(10px);
-      font-size:.82rem;
-      color:#d8e0ea;
+      background:rgba(255,248,238,.72);
+      border:1px solid rgba(31,27,24,.08);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      box-shadow:0 10px 20px rgba(68,42,23,.1);
+      font-size:.88rem;
+    }
+
+    .camera-chip{left:1rem;top:1rem}
+    .camera-count{right:1rem;top:1rem}
+
+    .visual-footer{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:.8rem;
+    }
+
+    .note-panel{
+      border-radius:22px;
+      background:rgba(255,255,255,.52);
+      border:1px solid rgba(31,27,24,.08);
+      padding:1rem 1rem 1rem 1.05rem;
+    }
+
+    .note-panel h3{
+      font-size:1rem;
+      margin-bottom:.5rem;
+    }
+
+    .note-panel p,
+    .note-panel li{
+      color:var(--muted);
+      line-height:1.6;
+      font-size:.94rem;
+    }
+
+    .note-panel ul{
+      margin:.35rem 0 0 1rem;
+      padding:0;
     }
 
     .gallery-section{
-      margin-top:1.5rem;
-      padding:clamp(1.2rem, 2vw, 1.6rem);
+      margin-top:1rem;
+      padding:1rem;
+      animation:fadeSlide 1.05s ease both;
     }
 
     .gallery-head{
       display:flex;
-      align-items:end;
       justify-content:space-between;
+      align-items:flex-end;
       gap:1rem;
-      margin-bottom:1.1rem;
+      margin-bottom:1rem;
     }
 
     .gallery-head p{
       margin:.45rem 0 0;
       color:var(--muted);
+      line-height:1.6;
+    }
+
+    .gallery-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      padding:.7rem .9rem;
+      border-radius:999px;
+      background:rgba(255,255,255,.56);
+      border:1px solid rgba(31,27,24,.08);
+      color:var(--muted);
+      white-space:nowrap;
     }
 
     .shots-grid{
@@ -341,24 +523,32 @@
 
     .shot{
       position:relative;
-      min-height:220px;
+      min-height:250px;
+      border-radius:24px;
       overflow:hidden;
-      border-radius:22px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
-        #10161d;
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 16px 40px rgba(0,0,0,.22);
-      transform:translateY(18px);
+        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06)),
+        #d8c5af;
+      border:1px solid rgba(31,27,24,.08);
+      box-shadow:0 16px 30px rgba(68,42,23,.1);
       opacity:0;
-      animation:revealUp .55s ease forwards;
+      transform:translateY(24px) scale(.985);
+      animation:stagger .55s ease forwards;
+    }
+
+    .shot::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:40%;
+      background:linear-gradient(180deg, transparent, rgba(0,0,0,.18));
+      pointer-events:none;
     }
 
     .shot img{
       width:100%;
       height:100%;
       object-fit:cover;
-      display:block;
     }
 
     .shot-tag{
@@ -366,52 +556,56 @@
       left:12px;
       top:12px;
       z-index:2;
-      padding:.5rem .75rem;
+      padding:.55rem .75rem;
       border-radius:999px;
-      background:rgba(10,15,20,.66);
-      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,250,242,.82);
+      border:1px solid rgba(31,27,24,.08);
       backdrop-filter:blur(10px);
-      font-size:.78rem;
+      font-size:.8rem;
+      font-weight:700;
     }
 
     .delete-shot-btn{
       position:absolute;
       right:12px;
       top:12px;
-      width:38px;
-      height:38px;
-      border-radius:50%;
-      background:rgba(255,255,255,0.92);
-      color:#111722;
+      z-index:2;
+      width:40px;
+      height:40px;
       display:grid;
       place-items:center;
-      font-size:1.2rem;
-      font-weight:700;
-      box-shadow:0 10px 22px rgba(0,0,0,.22);
-      z-index:2;
-    }
-
-    .delete-shot-btn:hover{
-      background:#fff;
-      transform:scale(1.06);
+      border-radius:50%;
+      background:rgba(255,250,242,.95);
+      color:#6d2f2f;
+      border:1px solid rgba(31,27,24,.08);
+      box-shadow:0 10px 20px rgba(68,42,23,.14);
+      font-size:1.15rem;
+      font-weight:800;
     }
 
     .shot-empty{
-      min-height:220px;
+      min-height:250px;
       display:grid;
       place-items:center;
-      padding:1.4rem;
       text-align:center;
+      padding:1.4rem;
       color:var(--muted);
       line-height:1.7;
       background:
-        radial-gradient(circle at center, rgba(122,167,255,.08), transparent 45%),
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+        radial-gradient(circle at center, rgba(207,106,50,.08), transparent 35%),
+        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+    }
+
+    .footer-note{
+      padding:1.1rem .3rem 0;
+      color:var(--muted);
+      font-size:.9rem;
+      text-align:center;
     }
 
     .reveal{
       opacity:0;
-      transform:translateY(30px);
+      transform:translateY(28px);
       transition:opacity .7s ease, transform .7s ease;
     }
 
@@ -420,115 +614,181 @@
       transform:translateY(0);
     }
 
-    @keyframes revealUp{
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
+    @keyframes fadeSlide{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
     }
 
-    @media (max-width: 980px){
-      .hero-shell{
-        grid-template-columns:1fr;
-      }
+    @keyframes stagger{
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    @media (max-width: 1100px){
       .hero{
+        grid-template-columns:1fr;
         min-height:auto;
       }
-      .hero-visual{
-        min-height:420px;
+      .hero-copy::before{
+        font-size:clamp(3.5rem, 16vw, 6rem);
       }
-      .camera-frame video{
-        min-height:420px;
-      }
-      .shots-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
+      .visual-footer{
+        grid-template-columns:1fr;
       }
     }
 
-    @media (max-width: 640px){
+    @media (max-width: 760px){
       .page{
-        width:min(calc(100% - 1rem), var(--max));
+        width:min(calc(100% - .9rem), var(--max));
       }
-      .meta-row{
-        grid-template-columns:1fr;
+      .site-nav{
+        align-items:flex-start;
+        flex-direction:column;
       }
-      .button-row{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-      }
-      .button-row button{
-        width:100%;
-      }
+      .meta-row,
+      .action-row,
+      .action-row.secondary,
       .shots-grid{
         grid-template-columns:1fr;
       }
+      .gallery-head{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .camera-stage,
+      .camera-stage video{
+        min-height:300px;
+      }
+      .hero-copy,
+      .hero-visual,
+      .gallery-section{
+        border-radius:24px;
+      }
       h1{
-        max-width:12ch;
+        max-width:11ch;
       }
     }
   </style>
 </head>
 <body>
+  <div class="grain" aria-hidden="true"></div>
+
   <main class="page">
+    <nav class="site-nav" aria-label="Projektkopf">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <strong>3D Scan Studio</strong>
+          <span>Sauberer Workflow für mobile Objektaufnahmen</span>
+        </div>
+      </div>
+      <div class="nav-status">
+        <span id="navDot" class="status-dot" aria-hidden="true"></span>
+        <span id="navStatusText">Kamera inaktiv</span>
+      </div>
+    </nav>
+
     <section class="hero">
-      <div class="hero-shell">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">3D Scan Studio</p>
-          <h1>Mach aus Handyfotos einen sauberen Scan-Workflow.</h1>
+      <article class="hero-copy surface reveal">
+        <div class="hero-top">
+          <p class="eyebrow">Mobile Erfassung</p>
+          <h1>Ein klarer Scan-Workflow, der sofort verständlich ist.</h1>
           <p class="lead">
-            Fotografiere ein Objekt aus mehreren Blickwinkeln, sortiere schlechte Aufnahmen sofort aus
-            und exportiere dein Projekt für den nächsten 3D-Schritt.
+            Fotografiere dein Objekt aus mehreren Winkeln, behalte nur die besten Aufnahmen
+            und exportiere dein Projekt sauber für den nächsten 3D-Schritt.
           </p>
 
-          <input id="projectNameInput" class="project-name" type="text" placeholder="Projektname, z. B. Blume_01" />
+          <div class="project-wrap">
+            <div class="project-label">
+              <span>Projektname</span>
+              <span>Wird lokal gespeichert</span>
+            </div>
+            <input id="projectNameInput" class="project-name" type="text" placeholder="z. B. Vase_01 oder Figur_Gold" />
+          </div>
 
           <div class="meta-row">
             <div class="meta-card">
               <span class="meta-label">Bilder</span>
               <strong id="imageCount">0</strong>
+              <span class="meta-note">Gespeicherte Ansichten</span>
             </div>
             <div class="meta-card">
               <span class="meta-label">Kamera</span>
               <strong id="cameraStateText">Inaktiv</strong>
+              <span class="meta-note">Live-Zugriff auf dein Gerät</span>
             </div>
             <div class="meta-card">
               <span class="meta-label">Status</span>
-              <strong id="cameraStatus">Kamera aus</strong>
+              <strong id="cameraStatus">Bereit zum Start</strong>
+              <span class="meta-note">Starte Aufnahme oder wähle Bilder</span>
             </div>
           </div>
 
-          <div class="button-row">
-            <button id="startCameraBtn" class="primary-btn">Kamera starten</button>
-            <button id="stopCameraBtn" class="secondary-btn">Kamera stoppen</button>
-            <button id="captureBtn" class="primary-btn">Foto aufnehmen</button>
-            <button id="openUploadBtn" class="secondary-btn">Bilder wählen</button>
-            <button id="clearBtn" class="danger-btn">Alle löschen</button>
-            <button id="downloadJsonBtn" class="secondary-btn">JSON exportieren</button>
+          <div class="action-cluster">
+            <div class="action-row">
+              <button id="startCameraBtn" class="primary-btn">Kamera starten</button>
+              <button id="stopCameraBtn" class="secondary-btn">Kamera stoppen</button>
+              <button id="captureBtn" class="primary-btn">Foto aufnehmen</button>
+            </div>
+            <div class="action-row secondary">
+              <button id="openUploadBtn" class="ghost-btn">Bilder wählen</button>
+              <button id="downloadJsonBtn" class="secondary-btn">JSON exportieren</button>
+              <button id="clearBtn" class="danger-btn">Alle löschen</button>
+            </div>
+          </div>
+
+          <div class="hint-strip">
+            Tipp: Für gute 3D-Ergebnisse fotografierst du das Objekt rundherum bei gleichmäßigem Licht
+            und mit möglichst ruhiger Kameraführung.
           </div>
 
           <input id="fileInput" type="file" accept="image/*" multiple hidden />
         </div>
+      </article>
 
-        <div class="hero-visual reveal">
-          <div class="camera-frame">
-            <span class="camera-badge">Live Capture</span>
-            <video id="video" autoplay playsinline muted></video>
-            <div class="camera-overlay"></div>
-            <canvas id="captureCanvas" hidden></canvas>
+      <aside class="hero-visual surface reveal" aria-label="Kameraansicht">
+        <div class="camera-stage">
+          <span class="camera-chip">Live-Vorschau</span>
+          <span class="camera-count"><span id="cameraCountText">0</span> Bilder</span>
+          <video id="video" autoplay playsinline muted></video>
+          <div class="camera-grid" aria-hidden="true"></div>
+          <canvas id="captureCanvas" hidden></canvas>
+        </div>
+
+        <div class="visual-footer">
+          <div class="note-panel">
+            <h3>Empfohlene Reihenfolge</h3>
+            <ul>
+              <li>Kamera starten</li>
+              <li>Objekt rundherum fotografieren</li>
+              <li>Schlechte Bilder direkt löschen</li>
+              <li>Projekt als JSON exportieren</li>
+            </ul>
+          </div>
+          <div class="note-panel">
+            <h3>Für saubere Resultate</h3>
+            <p>
+              Nutze einen ruhigen Hintergrund, weiches Licht und halte das Objekt möglichst vollständig
+              im Bild. Wiederholte Winkel kannst du später einfach entfernen.
+            </p>
           </div>
         </div>
-      </div>
+      </aside>
     </section>
 
-    <section class="gallery-section reveal">
+    <section class="gallery-section surface reveal">
       <div class="gallery-head">
         <div>
-          <h2>Aufnahmen</h2>
-          <p>Schlechte Bilder direkt löschen und nur gute Ansichten behalten.</p>
+          <p class="eyebrow" style="margin-bottom:.6rem">Galerie</p>
+          <h2>Deine Aufnahmen</h2>
+          <p>Alle Bilder bleiben übersichtlich an einem Ort und können einzeln entfernt werden.</p>
         </div>
+        <div class="gallery-pill">Sammlung für dein aktuelles Projekt</div>
       </div>
+
       <div id="shotsGrid" class="shots-grid"></div>
     </section>
+
+    <p class="footer-note">Lokal gespeichert im Browser · optimiert für Handy und Desktop</p>
   </main>
 
   <script>
@@ -547,14 +807,15 @@
       const cameraStatus = document.getElementById('cameraStatus');
       const cameraStateText = document.getElementById('cameraStateText');
       const projectNameInput = document.getElementById('projectNameInput');
+      const navDot = document.getElementById('navDot');
+      const navStatusText = document.getElementById('navStatusText');
+      const cameraCountText = document.getElementById('cameraCountText');
 
       let stream = null;
       let capturedImages = [];
       let projectName = localStorage.getItem('projectName') || 'bild_zu_3d_session';
 
-      if (projectNameInput) {
-        projectNameInput.value = projectName;
-      }
+      projectNameInput.value = projectName;
 
       function saveToStorage() {
         localStorage.setItem('projectName', projectName);
@@ -567,7 +828,7 @@
 
         if (savedName) {
           projectName = savedName;
-          if (projectNameInput) projectNameInput.value = savedName;
+          projectNameInput.value = savedName;
         }
 
         if (savedImages) {
@@ -579,11 +840,24 @@
         }
       }
 
+      function setCameraVisualState(active) {
+        navDot.classList.toggle('active', active);
+        navStatusText.textContent = active ? 'Kamera aktiv' : 'Kamera inaktiv';
+      }
+
       function updateStatus() {
-        imageCount.textContent = capturedImages.length;
         const active = !!stream;
-        cameraStatus.textContent = active ? 'Kamera aktiv' : 'Kamera aus';
+        imageCount.textContent = capturedImages.length;
+        cameraCountText.textContent = capturedImages.length;
+        cameraStatus.textContent = active ? 'Live-Aufnahme läuft' : 'Bereit zum Start';
         cameraStateText.textContent = active ? 'Aktiv' : 'Inaktiv';
+        setCameraVisualState(active);
+
+        captureBtn.disabled = !active;
+        stopCameraBtn.disabled = !active;
+
+        captureBtn.style.opacity = active ? '1' : '.6';
+        stopCameraBtn.style.opacity = active ? '1' : '.6';
       }
 
       function renderGallery() {
@@ -591,9 +865,12 @@
 
         if (capturedImages.length === 0) {
           shotsGrid.innerHTML = `
-            <div class="shot">
-              <div class="shot-empty">Noch keine Bilder vorhanden.<br>Starte die Kamera oder wähle Fotos aus.</div>
-            </div>
+            <article class="shot" style="animation-delay:0ms">
+              <div class="shot-empty">
+                Noch keine Bilder vorhanden.<br>
+                Starte die Kamera oder lade Fotos von deinem Gerät hoch.
+              </div>
+            </article>
           `;
           updateStatus();
           saveToStorage();
@@ -610,8 +887,7 @@
             <img src="${src}" alt="Aufgenommenes Objektbild ${index + 1}">
           `;
 
-          const deleteBtn = item.querySelector('.delete-shot-btn');
-          deleteBtn.addEventListener('click', () => {
+          item.querySelector('.delete-shot-btn').addEventListener('click', () => {
             capturedImages.splice(index, 1);
             renderGallery();
           });
@@ -627,6 +903,11 @@
         try {
           if (stream) return;
 
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Dein Browser unterstützt keinen Kamerazugriff.');
+            return;
+          }
+
           stream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { ideal: 'environment' },
@@ -637,10 +918,13 @@
           });
 
           video.srcObject = stream;
+          cameraStatus.textContent = 'Kamera wird vorbereitet';
           updateStatus();
         } catch (error) {
           alert('Kamera konnte nicht gestartet werden. Bitte Kamera-Freigabe erlauben.');
           console.error('Kamerafehler:', error);
+          stream = null;
+          updateStatus();
         }
       }
 
@@ -672,7 +956,7 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, width, height);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
         capturedImages.push(dataUrl);
         renderGallery();
       }
@@ -720,12 +1004,10 @@
         URL.revokeObjectURL(url);
       }
 
-      if (projectNameInput) {
-        projectNameInput.addEventListener('input', () => {
-          projectName = projectNameInput.value.trim() || 'bild_zu_3d_session';
-          saveToStorage();
-        });
-      }
+      projectNameInput.addEventListener('input', () => {
+        projectName = projectNameInput.value.trim() || 'bild_zu_3d_session';
+        saveToStorage();
+      });
 
       startCameraBtn.addEventListener('click', startCamera);
       stopCameraBtn.addEventListener('click', stopCamera);
@@ -747,9 +1029,7 @@
       renderGallery();
       updateStatus();
 
-      window.addEventListener('beforeunload', () => {
-        stopCamera();
-      });
+      window.addEventListener('beforeunload', stopCamera);
     });
   </script>
 </body>
