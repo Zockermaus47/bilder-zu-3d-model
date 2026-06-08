@@ -12,36 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const downloadJsonBtn = document.getElementById('downloadJsonBtn');
   const cameraStatus = document.getElementById('cameraStatus');
   const cameraStateText = document.getElementById('cameraStateText');
-  const heroCopy = document.querySelector('.hero-copy');
-  const metaRow = document.querySelector('.meta-row');
-
-  if (!video || !canvas || !startCameraBtn || !stopCameraBtn || !captureBtn || !openUploadBtn || !fileInput || !shotsGrid || !imageCount || !clearBtn || !downloadJsonBtn || !cameraStatus || !cameraStateText) {
-    console.error('Ein oder mehrere benötigte HTML-Elemente fehlen.');
-    return;
-  }
-
-  const projectNameInput = document.createElement('input');
-  projectNameInput.type = 'text';
-  projectNameInput.placeholder = 'Projektname, z. B. Blume_01';
-  projectNameInput.style.cssText = `
-    width:100%;
-    margin-top:18px;
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid rgba(31,27,24,0.12);
-    background:rgba(255,255,255,0.72);
-    font:inherit;
-    outline:none;
-    box-sizing:border-box;
-  `;
-
-  if (heroCopy) {
-    if (metaRow) {
-      heroCopy.insertBefore(projectNameInput, metaRow);
-    } else {
-      heroCopy.appendChild(projectNameInput);
-    }
-  }
+  const projectNameInput = document.getElementById('projectNameInput');
+  const navDot = document.getElementById('navDot');
+  const navStatusText = document.getElementById('navStatusText');
+  const cameraCountText = document.getElementById('cameraCountText');
 
   let stream = null;
   let capturedImages = [];
@@ -72,11 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function setCameraVisualState(active) {
+    navDot.classList.toggle('active', active);
+    navStatusText.textContent = active ? 'Kamera aktiv' : 'Kamera inaktiv';
+  }
+
   function updateStatus() {
-    imageCount.textContent = capturedImages.length;
     const active = !!stream;
-    cameraStatus.textContent = active ? 'Kamera aktiv' : 'Kamera aus';
+    imageCount.textContent = capturedImages.length;
+    cameraCountText.textContent = capturedImages.length;
+    cameraStatus.textContent = active ? 'Live-Aufnahme läuft' : 'Bereit zum Start';
     cameraStateText.textContent = active ? 'Aktiv' : 'Inaktiv';
+    setCameraVisualState(active);
+
+    captureBtn.disabled = !active;
+    stopCameraBtn.disabled = !active;
+    captureBtn.style.opacity = active ? '1' : '.6';
+    stopCameraBtn.style.opacity = active ? '1' : '.6';
   }
 
   function renderGallery() {
@@ -84,9 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (capturedImages.length === 0) {
       shotsGrid.innerHTML = `
-        <div class="shot">
-          <div class="shot-empty">Noch keine Bilder vorhanden.<br>Starte die Kamera oder wähle Fotos aus.</div>
-        </div>
+        <article class="shot" style="animation-delay:0ms">
+          <div class="shot-empty">
+            Noch keine Bilder vorhanden.<br>
+            Starte die Kamera oder lade Fotos von deinem Gerät hoch.
+          </div>
+        </article>
       `;
       updateStatus();
       saveToStorage();
@@ -96,19 +85,17 @@ document.addEventListener('DOMContentLoaded', () => {
     capturedImages.forEach((src, index) => {
       const item = document.createElement('article');
       item.className = 'shot';
+      item.style.animationDelay = `${index * 70}ms`;
       item.innerHTML = `
         <span class="shot-tag">Ansicht ${index + 1}</span>
         <button class="delete-shot-btn" aria-label="Bild ${index + 1} löschen">×</button>
         <img src="${src}" alt="Aufgenommenes Objektbild ${index + 1}">
       `;
 
-      const deleteBtn = item.querySelector('.delete-shot-btn');
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-          capturedImages.splice(index, 1);
-          renderGallery();
-        });
-      }
+      item.querySelector('.delete-shot-btn').addEventListener('click', () => {
+        capturedImages.splice(index, 1);
+        renderGallery();
+      });
 
       shotsGrid.appendChild(item);
     });
@@ -121,28 +108,38 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (stream) return;
 
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Dein Browser unterstützt keinen Kamerazugriff.');
+        return;
+      }
+
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          facingMode: { ideal: 'environment' }
         },
         audio: false
       });
 
       video.srcObject = stream;
+      await video.play();
       updateStatus();
     } catch (error) {
       alert('Kamera konnte nicht gestartet werden. Bitte Kamera-Freigabe erlauben.');
       console.error('Kamerafehler:', error);
+      stream = null;
+      updateStatus();
     }
   }
 
   function stopCamera() {
     if (!stream) return;
 
-    stream.getTracks().forEach(track => track.stop());
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+
     stream = null;
+    video.pause();
     video.srcObject = null;
     updateStatus();
   }
@@ -167,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, width, height);
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
     capturedImages.push(dataUrl);
     renderGallery();
   }
@@ -228,11 +225,17 @@ document.addEventListener('DOMContentLoaded', () => {
   clearBtn.addEventListener('click', clearAllImages);
   downloadJsonBtn.addEventListener('click', downloadProjectJson);
 
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('in-view');
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
   loadFromStorage();
   renderGallery();
   updateStatus();
 
-  window.addEventListener('beforeunload', () => {
-    stopCamera();
-  });
+  window.addEventListener('beforeunload', stopCamera);
 });
