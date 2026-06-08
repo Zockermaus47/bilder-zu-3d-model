@@ -15,6 +15,8 @@
       --line: rgba(255,255,255,0.12);
       --danger: #ff8e99;
       --accent-3: #7df0c8;
+      --gold: #ffd986;
+      --shadow: 0 24px 70px rgba(0,0,0,0.35);
     }
 
     * { box-sizing: border-box; }
@@ -124,6 +126,7 @@
       border-radius: 32px;
       backdrop-filter: blur(20px);
       overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .hero-copy {
@@ -134,7 +137,7 @@
       margin: 0 0 .8rem;
       text-transform: uppercase;
       letter-spacing: .22em;
-      color: #ffd986;
+      color: var(--gold);
       font-size: .78rem;
       font-weight: 800;
     }
@@ -297,10 +300,6 @@
     .camera-controls {
       display: grid;
       gap: .8rem;
-    }
-
-    .camera-controls .action-row {
-      grid-template-columns: repeat(3, minmax(0,1fr));
     }
 
     .visual-footer {
