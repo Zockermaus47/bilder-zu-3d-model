@@ -11,72 +11,794 @@
       --panel: rgba(18, 14, 31, 0.7);
       --accent: #ff72b6;
       --text: #f7f2ff;
+      --muted: #cbbfdd;
+      --line: rgba(255,255,255,0.12);
+      --danger: #ff8e99;
+      --accent-3: #7df0c8;
     }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    
-    /* Kamera-Bereich */
-    .camera-stage { position: relative; border-radius: 24px; overflow: hidden; background: #000; border: 2px solid var(--accent); }
-    video { width: 100%; display: block; }
-    
-    /* Buttons direkt unter dem Video */
-    .main-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .secondary-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-    
-    button { padding: 15px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary { background: #332a45; color: #fff; }
-    
-    .shots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 30px; }
-    .shot { border-radius: 15px; overflow: hidden; border: 1px solid #444; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,114,182,0.22), transparent 18%),
+        radial-gradient(circle at 86% 20%, rgba(143,124,255,0.24), transparent 18%),
+        radial-gradient(circle at 50% 100%, rgba(125,240,200,0.12), transparent 22%),
+        linear-gradient(135deg, #140c22 0%, #1c1230 42%, #2b1141 100%);
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .floral-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .95;
+      background-repeat: no-repeat;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg transform='translate(76 70)'%3E%3Cellipse cx='110' cy='60' rx='44' ry='96' fill='%23ff72b6' fill-opacity='.16' transform='rotate(12 110 60)'/%3E%3Cellipse cx='170' cy='118' rx='44' ry='96' fill='%238f7cff' fill-opacity='.15' transform='rotate(74 170 118)'/%3E%3Cellipse cx='108' cy='177' rx='44' ry='96' fill='%237df0c8' fill-opacity='.14' transform='rotate(139 108 177)'/%3E%3Cellipse cx='46' cy='120' rx='44' ry='96' fill='%23ffd986' fill-opacity='.12' transform='rotate(207 46 120)'/%3E%3Cellipse cx='104' cy='120' rx='30' ry='30' fill='%23fff4c9' fill-opacity='.2'/%3E%3Cpath d='M104 150 C94 208, 118 263, 152 324' stroke='%23bfa4ff' stroke-opacity='.18' stroke-width='8' stroke-linecap='round'/%3E%3Cpath d='M126 224 C171 214, 206 224, 247 256' stroke='%237df0c8' stroke-opacity='.16' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M134 258 C177 259, 209 280, 237 314' stroke='%23ff72b6' stroke-opacity='.13' stroke-width='5' stroke-linecap='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='540' viewBox='0 0 540 540'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg transform='translate(140 86)'%3E%3Cellipse cx='86' cy='48' rx='34' ry='80' fill='%237df0c8' fill-opacity='.12' transform='rotate(-14 86 48)'/%3E%3Cellipse cx='138' cy='90' rx='34' ry='80' fill='%23ff72b6' fill-opacity='.14' transform='rotate(62 138 90)'/%3E%3Cellipse cx='88' cy='144' rx='34' ry='80' fill='%238f7cff' fill-opacity='.15' transform='rotate(131 88 144)'/%3E%3Cellipse cx='34' cy='92' rx='34' ry='80' fill='%23ffd986' fill-opacity='.11' transform='rotate(208 34 92)'/%3E%3Cellipse cx='86' cy='94' rx='22' ry='22' fill='%23fff6d6' fill-opacity='.2'/%3E%3Cpath d='M86 116 C74 165, 92 220, 114 290' stroke='%23cdb3ff' stroke-opacity='.18' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M96 200 C50 234, 24 255, 12 292' stroke='%237df0c8' stroke-opacity='.14' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M108 210 C140 240, 174 252, 219 258' stroke='%23ff72b6' stroke-opacity='.14' stroke-width='5' stroke-linecap='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-position: left -70px top 40px, right -90px bottom 20px;
+      background-size: 420px 420px, 420px 420px;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 1rem), 1280px);
+      margin: 0 auto;
+      padding: 1rem 0 3rem;
+    }
+
+    .site-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: .7rem .15rem 1.2rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), #8f7cff);
+      position: relative;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .7rem .95rem;
+      border-radius: 999px;
+      background: rgba(18,14,31,.58);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+    }
+
+    .status-dot.active {
+      background: var(--accent-3);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.03fr .97fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .surface {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+    }
+
+    .hero-copy {
+      padding: 2rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 .8rem;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      color: #ffd986;
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: -.04em;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 6vw, 5.5rem);
+      line-height: .92;
+      max-width: 10ch;
+    }
+
+    .lead {
+      margin: 1rem 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 58ch;
+    }
+
+    .project-wrap {
+      margin-top: 1.25rem;
+    }
+
+    .project-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: .5rem;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .project-name {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 1rem 1.05rem;
+      outline: none;
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: .8rem;
+      margin-top: 1.15rem;
+    }
+
+    .meta-card {
+      padding: 1rem;
+      min-height: 104px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .meta-label {
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: .76rem;
+      color: #cdbfe0;
+    }
+
+    .meta-card strong {
+      font-size: 1.2rem;
+    }
+
+    .action-cluster {
+      display: grid;
+      gap: .95rem;
+      margin-top: 1.25rem;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: .8rem;
+    }
+
+    button {
+      min-height: 52px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary-btn { background: linear-gradient(135deg, var(--accent), #ff93c7); color: #250d1d; }
+    .secondary-btn { background: rgba(255,255,255,.08); color: var(--text); border: 1px solid rgba(255,255,255,.1); }
+    .ghost-btn { background: rgba(125,240,200,.12); color: #dffcf2; border: 1px solid rgba(125,240,200,.18); }
+    .danger-btn { background: rgba(255,142,153,.12); color: #ffd8dc; border: 1px solid rgba(255,142,153,.2); }
+
+    .hint-strip {
+      margin-top: 1rem;
+      padding: .95rem 1rem;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,114,182,.08), rgba(143,124,255,.08));
+      border: 1px dashed rgba(255,255,255,.14);
+      color: #dbcfe9;
+      line-height: 1.6;
+      font-size: .94rem;
+    }
+
+    .hero-visual {
+      padding: 1rem;
+      display: grid;
+      grid-template-rows: minmax(420px,1fr) auto;
+      gap: .9rem;
+    }
+
+    .camera-stage {
+      position: relative;
+      min-height: 420px;
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(145deg, #39214f, #22142f 52%, #120d1f 100%);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .camera-stage video {
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(transparent 33.1%, rgba(255,255,255,.14) 33.3%, transparent 33.5%),
+        linear-gradient(transparent 66.1%, rgba(255,255,255,.14) 66.3%, transparent 66.5%),
+        linear-gradient(90deg, transparent 33.1%, rgba(255,255,255,.14) 33.3%, transparent 33.5%),
+        linear-gradient(90deg, transparent 66.1%, rgba(255,255,255,.14) 66.3%, transparent 66.5%);
+    }
+
+    .camera-chip, .camera-count {
+      position: absolute;
+      z-index: 3;
+      padding: .65rem .85rem;
+      border-radius: 999px;
+      background: rgba(18,14,31,.58);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: .88rem;
+    }
+
+    .camera-chip { left: 1rem; top: 1rem; }
+    .camera-count { right: 1rem; top: 1rem; }
+
+    .camera-controls {
+      display: grid;
+      gap: .8rem;
+    }
+
+    .camera-controls .action-row {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .visual-footer {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: .8rem;
+    }
+
+    .note-panel {
+      border-radius: 22px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 1rem;
+    }
+
+    .note-panel h3 {
+      font-size: 1.35rem;
+      margin-bottom: .45rem;
+    }
+
+    .note-panel p, .note-panel li {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .94rem;
+    }
+
+    .note-panel ul {
+      margin: .35rem 0 0 1rem;
+      padding: 0;
+    }
+
+    .gallery-section {
+      margin-top: 1rem;
+      padding: 1rem;
+    }
+
+    .gallery-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .gallery-head p {
+      margin: .45rem 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .gallery-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .7rem .9rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .shots-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 1rem;
+    }
+
+    .shot {
+      position: relative;
+      min-height: 250px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #24162c;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .shot-tag {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      z-index: 2;
+      padding: .55rem .75rem;
+      border-radius: 999px;
+      background: rgba(18,14,31,.72);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .delete-shot-btn {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      z-index: 2;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.92);
+      color: #5a2240;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .shot-empty {
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 1.4rem;
+      color: var(--muted);
+      line-height: 1.7;
+      background: rgba(255,255,255,.05);
+    }
+
+    .footer-note {
+      padding: 1.1rem .3rem 0;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 1fr; }
+      .visual-footer { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .site-nav { flex-direction: column; align-items: flex-start; }
+      .meta-row, .action-row, .shots-grid { grid-template-columns: 1fr; }
+      .gallery-head { flex-direction: column; align-items: flex-start; }
+      .camera-stage, .camera-stage video { min-height: 300px; }
+      .hero-copy, .hero-visual, .gallery-section { border-radius: 24px; }
+    }
   </style>
 </head>
 <body>
+  <div class="floral-bg" aria-hidden="true"></div>
 
-<div class="container">
-  <h1>3D Scan Studio</h1>
-  
-  <div class="camera-stage">
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="captureCanvas" hidden></canvas>
-  </div>
+  <main class="page">
+    <nav class="site-nav">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-copy">
+          <strong>3D Scan Studio</strong>
+          <span>Farbig, elegant und klar aufgebaut</span>
+        </div>
+      </div>
+      <div class="nav-status">
+        <span id="navDot" class="status-dot"></span>
+        <span id="navStatusText">Kamera inaktiv</span>
+      </div>
+    </nav>
 
-  <!-- Wichtige Buttons direkt unter dem Video -->
-  <div class="main-controls">
-    <button id="startCameraBtn" class="btn-primary">Start</button>
-    <button id="stopCameraBtn" class="btn-secondary">Stop</button>
-    <button id="captureBtn" class="btn-primary">Foto</button>
-  </div>
+    <section class="hero">
+      <article class="hero-copy surface">
+        <div>
+          <p class="eyebrow">Floral Interface</p>
+          <h1>Dein Scan-Workflow mit mehr Farbe und Charakter.</h1>
+          <p class="lead">
+            Eine übersichtliche Aufnahmeoberfläche mit dunklem, buntem Blumenhintergrund,
+            klaren Aktionen und einer Galerie, die auf Handy und Desktop sauber funktioniert.
+          </p>
 
-  <!-- Sekundäre Buttons -->
-  <div class="secondary-controls">
-    <button id="openUploadBtn" class="btn-secondary">Upload</button>
-    <button id="downloadJsonBtn" class="btn-secondary">Export</button>
-    <button id="clearBtn" class="btn-secondary" style="color: #ff8e99;">Löschen</button>
-  </div>
+          <div class="project-wrap">
+            <div class="project-label">
+              <span>Projektname</span>
+              <span>Lokal im Browser gespeichert</span>
+            </div>
+            <input id="projectNameInput" class="project-name" type="text" placeholder="z. B. Blume_01 oder Vase_Lila" />
+          </div>
 
-  <input id="fileInput" type="file" accept="image/*" multiple hidden />
+          <div class="meta-row">
+            <div class="meta-card">
+              <span class="meta-label">Bilder</span>
+              <strong id="imageCount">0</strong>
+              <span class="meta-note">Gespeicherte Ansichten</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Kamera</span>
+              <strong id="cameraStateText">Inaktiv</strong>
+              <span class="meta-note">Live-Vorschau auf dein Objekt</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Status</span>
+              <strong id="cameraStatus">Bereit zum Start</strong>
+              <span class="meta-note">Kamera oder Upload verwenden</span>
+            </div>
+          </div>
 
-  <div id="shotsGrid" class="shots-grid"></div>
-</div>
+          <div class="action-cluster">
+            <div class="action-row">
+              <button id="openUploadBtn" class="ghost-btn">Bilder wählen</button>
+              <button id="downloadJsonBtn" class="secondary-btn">JSON exportieren</button>
+              <button id="clearBtn" class="danger-btn">Alle löschen</button>
+            </div>
+          </div>
 
-<script>
-  // Die Logik bleibt identisch, damit alles stabil läuft.
-  // Ich habe die Event-Listener für die Buttons beibehalten.
-  document.addEventListener('DOMContentLoaded', () => {
-    const video = document.getElementById('video');
-    const startCameraBtn = document.getElementById('startCameraBtn');
-    const stopCameraBtn = document.getElementById('stopCameraBtn');
-    const captureBtn = document.getElementById('captureBtn');
-    
-    // ... (Hier fügst du die restliche Logik aus dem vorherigen Script ein)
-    
-    startCameraBtn.addEventListener('click', async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
+          <div class="hint-strip">
+            Für schöne 3D-Aufnahmen: nimm dein Objekt aus vielen Winkeln auf, achte auf ruhige
+            Handbewegungen und lösche unscharfe Bilder direkt in der Galerie.
+          </div>
+
+          <input id="fileInput" type="file" accept="image/*" multiple hidden />
+        </div>
+      </article>
+
+      <aside class="hero-visual surface">
+        <div class="camera-stage">
+          <span class="camera-chip">Live-Vorschau</span>
+          <span class="camera-count"><span id="cameraCountText">0</span> Bilder</span>
+          <video id="video" autoplay playsinline muted></video>
+          <div class="camera-grid"></div>
+          <canvas id="captureCanvas" hidden></canvas>
+        </div>
+
+        <div class="camera-controls">
+          <div class="action-row">
+            <button id="startCameraBtn" class="primary-btn">Kamera starten</button>
+            <button id="stopCameraBtn" class="secondary-btn">Kamera stoppen</button>
+            <button id="captureBtn" class="primary-btn">Foto aufnehmen</button>
+          </div>
+        </div>
+
+        <div class="visual-footer">
+          <div class="note-panel">
+            <h3>Empfohlener Ablauf</h3>
+            <ul>
+              <li>Kamera starten</li>
+              <li>Objekt rundherum aufnehmen</li>
+              <li>Schlechte Bilder löschen</li>
+              <li>Projekt exportieren</li>
+            </ul>
+          </div>
+          <div class="note-panel">
+            <h3>Design mit Blumenlook</h3>
+            <p>
+              Der Hintergrund ist dunkel, farbig und floral aufgebaut — ohne externe Bilder,
+              damit die Seite stabil auf GitHub Pages läuft.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="gallery-section surface">
+      <div class="gallery-head">
+        <div>
+          <p class="eyebrow" style="margin-bottom:.6rem">Galerie</p>
+          <h2>Deine Aufnahmen</h2>
+          <p>Alle Bilder bleiben übersichtlich an einem Ort und lassen sich einzeln entfernen.</p>
+        </div>
+        <div class="gallery-pill">Bunte Dark-Mode Oberfläche</div>
+      </div>
+
+      <div id="shotsGrid" class="shots-grid"></div>
+    </section>
+
+    <p class="footer-note">Lokal gespeichert im Browser · optimiert für Handy und Desktop</p>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('captureCanvas');
+      const startCameraBtn = document.getElementById('startCameraBtn');
+      const stopCameraBtn = document.getElementById('stopCameraBtn');
+      const captureBtn = document.getElementById('captureBtn');
+      const openUploadBtn = document.getElementById('openUploadBtn');
+      const fileInput = document.getElementById('fileInput');
+      const shotsGrid = document.getElementById('shotsGrid');
+      const imageCount = document.getElementById('imageCount');
+      const clearBtn = document.getElementById('clearBtn');
+      const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+      const cameraStatus = document.getElementById('cameraStatus');
+      const cameraStateText = document.getElementById('cameraStateText');
+      const projectNameInput = document.getElementById('projectNameInput');
+      const navDot = document.getElementById('navDot');
+      const navStatusText = document.getElementById('navStatusText');
+      const cameraCountText = document.getElementById('cameraCountText');
+
+      let stream = null;
+      let capturedImages = [];
+      let projectName = localStorage.getItem('projectName') || 'bild_zu_3d_session';
+
+      projectNameInput.value = projectName;
+
+      function saveToStorage() {
+        localStorage.setItem('projectName', projectName);
+        localStorage.setItem('capturedImages', JSON.stringify(capturedImages));
+      }
+
+      function loadFromStorage() {
+        const savedName = localStorage.getItem('projectName');
+        const savedImages = localStorage.getItem('capturedImages');
+
+        if (savedName) {
+          projectName = savedName;
+          projectNameInput.value = savedName;
+        }
+
+        if (savedImages) {
+          try {
+            capturedImages = JSON.parse(savedImages) || [];
+          } catch (e) {
+            capturedImages = [];
+          }
+        }
+      }
+
+      function setCameraVisualState(active) {
+        navDot.classList.toggle('active', active);
+        navStatusText.textContent = active ? 'Kamera aktiv' : 'Kamera inaktiv';
+      }
+
+      function updateStatus() {
+        const active = !!stream;
+        imageCount.textContent = capturedImages.length;
+        cameraCountText.textContent = capturedImages.length;
+        cameraStatus.textContent = active ? 'Live-Aufnahme läuft' : 'Bereit zum Start';
+        cameraStateText.textContent = active ? 'Aktiv' : 'Inaktiv';
+        setCameraVisualState(active);
+
+        captureBtn.disabled = !active;
+        stopCameraBtn.disabled = !active;
+        captureBtn.style.opacity = active ? '1' : '.6';
+        stopCameraBtn.style.opacity = active ? '1' : '.6';
+      }
+
+      function renderGallery() {
+        shotsGrid.innerHTML = '';
+
+        if (capturedImages.length === 0) {
+          shotsGrid.innerHTML = `
+            <article class="shot">
+              <div class="shot-empty">
+                Noch keine Bilder vorhanden.<br>
+                Starte die Kamera oder lade Fotos von deinem Gerät hoch.
+              </div>
+            </article>
+          `;
+          updateStatus();
+          saveToStorage();
+          return;
+        }
+
+        capturedImages.forEach((src, index) => {
+          const item = document.createElement('article');
+          item.className = 'shot';
+          item.innerHTML = `
+            <span class="shot-tag">Ansicht ${index + 1}</span>
+            <button class="delete-shot-btn" aria-label="Bild ${index + 1} löschen">×</button>
+            <img src="${src}" alt="Aufgenommenes Objektbild ${index + 1}">
+          `;
+
+          item.querySelector('.delete-shot-btn').addEventListener('click', () => {
+            capturedImages.splice(index, 1);
+            renderGallery();
+          });
+
+          shotsGrid.appendChild(item);
+        });
+
+        updateStatus();
+        saveToStorage();
+      }
+
+      async function startCamera() {
+        try {
+          if (stream) return;
+
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Dein Browser unterstützt keinen Kamerazugriff.');
+            return;
+          }
+
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' }
+            },
+            audio: false
+          });
+
+          video.srcObject = stream;
+          await video.play();
+          updateStatus();
+        } catch (error) {
+          alert('Kamera konnte nicht gestartet werden. Bitte Kamera-Freigabe erlauben.');
+          console.error('Kamerafehler:', error);
+          stream = null;
+          updateStatus();
+        }
+      }
+
+      function stopCamera() {
+        if (!stream) return;
+
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        video.pause();
+        video.srcObject = null;
+        updateStatus();
+      }
+
+      function captureImage() {
+        if (!stream) {
+          alert('Bitte zuerst die Kamera starten.');
+          return;
+        }
+
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+
+        if (!width || !height) {
+          alert('Kamera ist noch nicht bereit. Bitte kurz warten und erneut versuchen.');
+          return;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        capturedImages.push(dataUrl);
+        renderGallery();
+      }
+
+      function handleFileSelect(event) {
+        const files = Array.from(event.target.files || []);
+        if (!files.length) return;
+
+        files.forEach(file => {
+          if (!file.type.startsWith('image/')) return;
+
+          const reader = new FileReader();
+          reader.onload = e => {
+            capturedImages.push(e.target.result);
+            renderGallery();
+          };
+          reader.readAsDataURL(file);
+        });
+
+        fileInput.value = '';
+      }
+
+      function clearAllImages() {
+        if (!capturedImages.length) return;
+        const confirmDelete = confirm('Möchtest du wirklich alle Bilder löschen?');
+        if (!confirmDelete) return;
+        capturedImages = [];
+        renderGallery();
+      }
+
+      function downloadProjectJson() {
+        const payload = {
+          project_name: projectName,
+          created_at: new Date().toISOString(),
+          image_count: capturedImages.length,
+          images: capturedImages
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${projectName || 'projekt'}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      projectNameInput.addEventListener('input', () => {
+        projectName = projectNameInput.value.trim() || 'bild_zu_3d_session';
+        saveToStorage();
+      });
+
+      startCameraBtn.addEventListener('click', startCamera);
+      stopCameraBtn.addEventListener('click', stopCamera);
+      captureBtn.addEventListener('click', captureImage);
+      openUploadBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
+      clearBtn.addEventListener('click', clearAllImages);
+      downloadJsonBtn.addEventListener('click', downloadProjectJson);
+
+      loadFromStorage();
+      renderGallery();
+      updateStatus();
+
+      window.addEventListener('beforeunload', stopCamera);
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
